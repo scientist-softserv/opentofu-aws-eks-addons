@@ -222,16 +222,12 @@ resource "aws_iam_role_policy_attachment" "attach_iam_policy_to_iam_role_snap" {
   policy_arn = aws_iam_policy.snapshot_policy.arn
 }
 
-data "template_file" "lambda_function_script" {
-  template = file("${path.module}/delete-snapshot.py")
-  vars = {
+resource "local_file" "rendered_template" {
+  content  =       templatefile("${path.module}/delete-snapshot.py", {
     retention_period_in_days = var.velero_config.retention_period_in_days,
     region                   = var.region
-  }
-}
+  })
 
-resource "local_file" "rendered_template" {
-  content  = data.template_file.lambda_function_script.rendered
   filename = "${path.module}/rendered/delete-snapshot.py"
 }
 
